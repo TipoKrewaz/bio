@@ -213,7 +213,6 @@
     </div>
 
     <script>
-        // 1. Matrix Background
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         let width = canvas.width = window.innerWidth;
@@ -237,7 +236,6 @@
         }
         setInterval(drawMatrix, 50);
 
-        // 2. Logging
         function logAction(action) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -248,7 +246,7 @@
             document.getElementById('entropy').innerText = (Math.random() * 0.05).toFixed(4) + "%";
         }
 
-        // 3. Uptime Counter
+
         let seconds = 0;
         setInterval(() => {
             seconds++;
@@ -258,14 +256,13 @@
             document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
         }, 1000);
 
-        // 4. Madness
+
         function madness() {
             document.body.style.animation = "glitch 0.1s infinite";
             logAction('CRITICAL_KERNEL_PANIC');
             setTimeout(() => document.body.style.animation = "none", 600);
         }
 
-        // 5. Initial Boot
         window.onload = () => {
             const status = document.getElementById('sys-status');
             const phases = ["BOOTING...", "MAPPING_STACK...", "ALLOCATING_MEMORY...", "READY."];
