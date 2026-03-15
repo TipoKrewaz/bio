@@ -9,11 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #dc2626; 
-            --bg-color: #000000;      
+            --primary-color: #dc2626;
+            --bg-color: #000000;
             --bg-window: rgba(5, 5, 5, 0.93);
-            --text-main: #d1d5db;     
-            --tag-bg: rgba(220, 38, 38, 0.15); 
+            --text-main: #d1d5db;
+            --tag-bg: rgba(220, 38, 38, 0.15);
         }
 
         body {
@@ -50,10 +50,10 @@
         }
 
         .text-accent { color: var(--primary-color); text-shadow: 0 0 10px var(--primary-color); }
-        
-        .tag { 
-            background: var(--tag-bg); 
-            color: var(--primary-color); 
+
+        .tag {
+            background: var(--tag-bg);
+            color: var(--primary-color);
             border: 1px solid rgba(220, 38, 38, 0.2);
             font-size: 9px;
             padding: 1px 6px;
@@ -69,7 +69,7 @@
         .tag:hover { background: var(--primary-color); color: black; transform: translateY(-1px); }
 
         .skill-category { border-bottom: 1px solid rgba(220, 38, 38, 0.1); padding-bottom: 12px; margin-bottom: 16px; }
-        
+
         .avatar-container { position: relative; overflow: hidden; border-radius: 8px; flex-shrink: 0; }
         .avatar-container:hover img { filter: grayscale(0%) contrast(1.5) brightness(1.2); }
         .avatar-container:hover::after {
@@ -99,188 +99,292 @@
         .blink { animation: blink 2s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
-        .toast { background: rgba(20, 0, 0, 0.9); color: var(--primary-color); padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 4px; margin-top: 10px; font-size: 11px; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; pointer-events: none; }
+        .toast { background: rgba(20, 0, 0, 0.95); color: var(--primary-color); padding: 8px 16px; border: 1px solid var(--primary-color); border-radius: 2px; margin-top: 6px; font-size: 10px; font-weight: bold; animation: slideIn 0.2s ease-out; box-shadow: 0 0 10px rgba(220, 38, 38, 0.2); transition: opacity 0.5s; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Volume Slider Styling */
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 50px;
+            height: 2px;
+            background: #1e1b4b;
+            outline: none;
+            transition: width 0.3s ease;
+        }
+        .volume-slider:hover { width: 70px; }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 8px;
+            height: 8px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 0;
+            box-shadow: 0 0 5px var(--primary-color);
+        }
     </style>
 </head>
 <body class="p-4 md:p-12 min-h-screen flex flex-col gap-8 items-center">
-    
-    <canvas id="matrix"></canvas>
-    <div id="toast-container"></div>
 
-    <div class="terminal-window rounded-lg p-8 md:p-10 w-full max-w-5xl">
-        <div class="text-[10px] mb-6 opacity-40 uppercase tracking-widest text-accent blink" id="sys-status">root@jvzxdx: ~ # INITIALIZING...</div>
-        
-        <div class="flex flex-col md:flex-row items-center gap-12">
-            <div class="avatar-container" id="main-avatar">
-                <div class="absolute -inset-2 bg-red-600 rounded-lg blur opacity-25"></div>
-                <img id="avatarImage" src="bgg.jpg" class="relative w-40 h-40 rounded-lg object-cover grayscale contrast-125 border-2 border-red-900/50 transition-all duration-500">
-            </div>
-            
-            <div class="text-center md:text-left flex-1">
-                <h1 class="text-5xl font-bold text-accent tracking-tighter uppercase typewriter">jvzxdx_null</h1>
-                <p class="text-xl text-slate-100 mt-2 font-bold tracking-tight uppercase">Full-Stack Backend Architect</p>
-                <p class="text-sm italic opacity-70 mt-1 cursor-help" onclick="madness()">"Мой код не падает, он отдыхает."</p>
-                <p class="text-sm italic opacity-70 mt-1 cursor-help">"700/700. Сошел с ума в октябре"</p>
-            </div>
-        </div>
-        
-        <div class="mt-10 p-5 bg-red-950/30 rounded border-l-4 border-red-700 backdrop-blur-md">
-            <p class="text-sm leading-relaxed text-slate-200">
-                <span class="text-accent font-bold blink">>_</span> Проектирую системы на <span class="text-white font-bold">Go</span> и <span class="text-white font-bold">Python</span> так, будто сопровождать мой код будет <span class="text-red-500 font-bold uppercase italic">вооруженный психопат</span>. Clean Architecture и TDD — это не выбор, это выживание.
-                <span class="text-red-500 font-bold uppercase italic">МЕНЯ ИЩЕТ ИНТЕРПОЛ</span>
-            </p>
+<canvas id="matrix"></canvas>
+<div id="toast-container"></div>
+
+<div class="terminal-window rounded-lg p-8 md:p-10 w-full max-w-5xl">
+    <div class="text-[10px] mb-6 opacity-40 uppercase tracking-widest text-accent blink" id="sys-status">root@jvzxdx: ~ # INITIALIZING...</div>
+
+    <div class="flex flex-col md:flex-row items-center gap-12">
+        <div class="avatar-container" id="main-avatar">
+            <div class="absolute -inset-2 bg-red-600 rounded-lg blur opacity-25"></div>
+            <img id="avatarImage" src="bgg.jpg" class="relative w-40 h-40 rounded-lg object-cover grayscale contrast-125 border-2 border-red-900/50 transition-all duration-500">
         </div>
 
-        <div class="flex justify-center mt-10">
-            <a href="https://t.me/hvxzzz" onmouseover="logAction('HANDSHAKE_TELEGRAM')" class="group relative px-16 py-4 border border-red-700 bg-red-950/20 text-accent hover:bg-red-700 hover:text-black transition-all duration-300 font-bold tracking-[0.5em] text-sm rounded-sm overflow-hidden">
-                <span class="relative z-10">// EXEC_TELEGRAM</span>
-                <div class="absolute top-0 -inset-x-full h-full w-1/2 block transform -skew-x-12 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 animate-shine"></div>
-            </a>
+        <div class="text-center md:text-left flex-1">
+            <h1 class="text-5xl font-bold text-accent tracking-tighter uppercase typewriter">jvzxdx_null</h1>
+            <p class="text-xl text-slate-100 mt-2 font-bold tracking-tight uppercase">Full-Stack Backend Architect</p>
+            <p class="text-sm italic opacity-70 mt-1 cursor-help" onclick="madness()">"Мой код не падает, он отдыхает."</p>
+            <p class="text-sm italic opacity-70 mt-1 cursor-help" onclick="madness()">"700/700. Сошел с ума в октябре"</p>
         </div>
     </div>
 
-    <div class="terminal-window rounded-lg p-8 md:p-10 w-full max-w-5xl">
-        <div class="text-[10px] mb-8 opacity-40 uppercase tracking-widest text-accent blink">root@jvzxdx: ~/skills # dump_full_stack_v3.0 --all</div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12">
-            <div class="space-y-6">
-                <div class="skill-category" onmouseover="logAction('SCANNING_GOLANG_STACK')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// GOLANG_SYSTEM_CORE</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">Go</span><span class="tag">net/http</span><span class="tag">Gin</span><span class="tag">Chi</span><span class="tag">gRPC</span><span class="tag">Protobuf</span><span class="tag">pprof</span><span class="tag">zap</span><span class="tag">zerolog</span><span class="tag">golangci-lint</span><span class="tag">go test</span><span class="tag">testcontainers-go</span>
-                    </div>
-                </div>
+    <div class="mt-10 p-5 bg-red-950/30 rounded border-l-4 border-red-700 backdrop-blur-md">
+        <p class="text-sm leading-relaxed text-slate-200">
+            <span class="text-accent font-bold blink">>_</span> Проектирую системы на <span class="text-white font-bold">Go</span> и <span class="text-white font-bold">Python</span> так, будто сопровождать мой код будет <span class="text-red-500 font-bold uppercase italic">вооруженный психопат</span>. Clean Architecture и TDD — это не выбор, это выживание.
+            <span class="text-red-500 font-bold uppercase italic">МЕНЯ ИЩЕТ ИНТЕРПОЛ</span>
+        </p>
+    </div>
 
-                <div class="skill-category" onmouseover="logAction('SCANNING_PYTHON_STACK')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// PYTHON_DATA_SCIENCE_&_BACKEND</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">Python 3.12</span><span class="tag">FastAPI</span><span class="tag">Django</span><span class="tag">DRF</span><span class="tag">SQLAlchemy 2.0</span><span class="tag">Pydantic</span><span class="tag">Alembic</span><span class="tag">TaskIQ</span><span class="tag">Celery</span><span class="tag">FastStream</span><span class="tag">aio_pika</span><span class="tag">asyncpg</span>
-                    </div>
-                </div>
+    <div class="flex justify-center mt-10">
+        <a href="https://t.me/hvxzzz" onmouseover="logAction('HANDSHAKE_TELEGRAM')" class="group relative px-16 py-4 border border-red-700 bg-red-950/20 text-accent hover:bg-red-700 hover:text-black transition-all duration-300 font-bold tracking-[0.5em] text-sm rounded-sm overflow-hidden">
+            <span class="relative z-10">// EXEC_TELEGRAM</span>
+            <div class="absolute top-0 -inset-x-full h-full w-1/2 block transform -skew-x-12 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 animate-shine"></div>
+        </a>
+    </div>
+</div>
 
-                <div class="skill-category" onmouseover="logAction('DATABASE_INTEGRITY_CHECK')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// PERSISTENCE_STORAGE</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">PostgreSQL</span><span class="tag">Redis</span><span class="tag">Elasticsearch</span><span class="tag">Logstash</span><span class="tag">Kibana</span><span class="tag">ELK</span><span class="tag">pgx</span>
-                    </div>
-                </div>
+<div class="terminal-window rounded-lg p-8 md:p-10 w-full max-w-5xl">
+    <div class="text-[10px] mb-8 opacity-40 uppercase tracking-widest text-accent blink">root@jvzxdx: ~/skills # dump_full_stack_v3.0 --all</div>
 
-                <div class="skill-category" onmouseover="logAction('MESSAGING_BUS_CHECK')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// ASYNC_COMMUNICATION</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">Apache Kafka</span><span class="tag">RabbitMQ</span><span class="tag">AMQP</span><span class="tag">MQTT</span><span class="tag">GraphQL</span><span class="tag">REST API</span><span class="tag">Swagger</span><span class="tag">OpenAPI</span>
-                    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+        <div class="space-y-6">
+            <div class="skill-category" onmouseenter="logAction('SCANNING_GOLANG_STACK')">
+                <h3 class="text-accent text-xs font-bold mb-3">// GOLANG_SYSTEM_CORE</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">Go</span><span class="tag">net/http</span><span class="tag">Gin</span><span class="tag">Chi</span><span class="tag">gRPC</span><span class="tag">Protobuf</span><span class="tag">pprof</span><span class="tag">zap</span><span class="tag">zerolog</span><span class="tag">golangci-lint</span><span class="tag">go test</span><span class="tag">testcontainers-go</span>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <div class="skill-category" onmouseover="logAction('INFRASTRUCTURE_AUDIT')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// INFRASTRUCTURE_&_DEVOPS</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">Docker</span><span class="tag">Docker-compose</span><span class="tag">Kubernetes</span><span class="tag">Linux</span><span class="tag">Git</span><span class="tag">GitLab CI</span><span class="tag">GitHub</span><span class="tag">CI/CD</span>
-                    </div>
+            <div class="skill-category" onmouseenter="logAction('SCANNING_PYTHON_STACK')">
+                <h3 class="text-accent text-xs font-bold mb-3">// PYTHON_DATA_SCIENCE_&_BACKEND</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">Python 3.12</span><span class="tag">FastAPI</span><span class="tag">Django</span><span class="tag">DRF</span><span class="tag">SQLAlchemy 2.0</span><span class="tag">Pydantic</span><span class="tag">Alembic</span><span class="tag">TaskIQ</span><span class="tag">Celery</span><span class="tag">FastStream</span><span class="tag">aio_pika</span><span class="tag">asyncpg</span>
                 </div>
+            </div>
 
-                <div class="skill-category" onmouseover="logAction('OBSERVABILITY_SCAN')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// MONITORING_&_METRICS</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">OpenTelemetry</span><span class="tag">Prometheus</span><span class="tag">Grafana</span><span class="tag">TCP/IP</span><span class="tag">HTTP</span>
-                    </div>
+            <div class="skill-category" onmouseenter="logAction('DATABASE_INTEGRITY_CHECK')">
+                <h3 class="text-accent text-xs font-bold mb-3">// PERSISTENCE_STORAGE</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">PostgreSQL</span><span class="tag">Redis</span><span class="tag">Elasticsearch</span><span class="tag">Logstash</span><span class="tag">Kibana</span><span class="tag">ELK</span><span class="tag">pgx</span>
                 </div>
+            </div>
 
-                <div class="skill-category" onmouseover="logAction('METHODOLOGY_VAL')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// ARCHITECTURE_METHODOLOGY</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">Clean Architecture</span><span class="tag">Microservices</span><span class="tag">DDD</span><span class="tag">TDD</span><span class="tag">ООП</span><span class="tag">MVC</span><span class="tag">MVP</span><span class="tag">SSO/OAuth 2</span><span class="tag">Scrum</span><span class="tag">Agile</span><span class="tag">Kanban</span><span class="tag">Scrumban</span>
-                    </div>
-                </div>
-
-                <div class="skill-category" onmouseover="logAction('FRONTEND_MINIMALISM')">
-                    <h3 class="text-accent text-xs font-bold mb-3">// FRONTEND_LIGHT</h3>
-                    <div class="flex flex-wrap gap-1">
-                        <span class="tag">HTMX</span><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Tailwind</span>
-                    </div>
-                </div>
-                
-                <div class="bg-red-950/20 p-4 border border-red-900/50 rounded text-[9px] uppercase tracking-tighter opacity-60">
-                    System Entropy: <span id="entropy" class="text-accent">0.0001%</span><br>
-                    Uptime: <span id="uptime">00:00:00</span><br>
-                    Status: <span class="text-green-500">Operation_Normal</span>
+            <div class="skill-category" onmouseenter="logAction('MESSAGING_BUS_CHECK')">
+                <h3 class="text-accent text-xs font-bold mb-3">// ASYNC_COMMUNICATION</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">Apache Kafka</span><span class="tag">RabbitMQ</span><span class="tag">AMQP</span><span class="tag">MQTT</span><span class="tag">GraphQL</span><span class="tag">REST API</span><span class="tag">Swagger</span><span class="tag">OpenAPI</span>
                 </div>
             </div>
         </div>
+
+        <div class="space-y-6">
+            <div class="skill-category" onmouseenter="logAction('INFRASTRUCTURE_AUDIT')">
+                <h3 class="text-accent text-xs font-bold mb-3">// INFRASTRUCTURE_&_DEVOPS</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">Docker</span><span class="tag">Docker-compose</span><span class="tag">Kubernetes</span><span class="tag">Linux</span><span class="tag">Git</span><span class="tag">GitLab CI</span><span class="tag">GitHub</span><span class="tag">CI/CD</span>
+                </div>
+            </div>
+
+            <div class="skill-category" onmouseenter="logAction('OBSERVABILITY_SCAN')">
+                <h3 class="text-accent text-xs font-bold mb-3">// MONITORING_&_METRICS</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">OpenTelemetry</span><span class="tag">Prometheus</span><span class="tag">Grafana</span><span class="tag">TCP/IP</span><span class="tag">HTTP</span>
+                </div>
+            </div>
+
+            <div class="skill-category" onmouseenter="logAction('METHODOLOGY_VAL')">
+                <h3 class="text-accent text-xs font-bold mb-3">// ARCHITECTURE_METHODOLOGY</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">Clean Architecture</span><span class="tag">Microservices</span><span class="tag">DDD</span><span class="tag">TDD</span><span class="tag">ООП</span><span class="tag">MVC</span><span class="tag">MVP</span><span class="tag">SSO/OAuth 2</span><span class="tag">Scrum</span><span class="tag">Agile</span><span class="tag">Kanban</span><span class="tag">Scrumban</span>
+                </div>
+            </div>
+
+            <div class="skill-category" onmouseenter="logAction('FRONTEND_MINIMALISM')">
+                <h3 class="text-accent text-xs font-bold mb-3">// FRONTEND_LIGHT</h3>
+                <div class="flex flex-wrap gap-1">
+                    <span class="tag">HTMX</span><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Tailwind</span>
+                </div>
+            </div>
+
+            <div class="bg-red-950/20 p-4 border border-red-900/50 rounded text-[9px] uppercase tracking-tighter opacity-60">
+                System Entropy: <span id="entropy" class="text-accent">0.0001%</span><br>
+                Uptime: <span id="uptime">00:00:00</span><br>
+                Status: <span class="text-green-500">Operation_Normal</span>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-        const letters = "01010101ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        const fontSize = 14;
-        let columns = width / fontSize;
-        let drops = Array(Math.floor(columns)).fill(1);
+<div class="terminal-window fixed bottom-4 right-4 p-4 z-[100] flex items-center gap-4 border-red-600/50 w-72 shadow-2xl rounded-sm">
+    <button id="play-pause" class="text-accent hover:scale-110 transition-transform text-2xl focus:outline-none">▶</button>
+    <div class="flex-1 flex flex-col gap-1">
+        <div class="flex justify-between items-center">
+            <div class="text-[9px] text-accent uppercase tracking-tighter overflow-hidden whitespace-nowrap" id="track-info">
+                0xDEADBEEF_AUDIO.SYS
+            </div>
+            <input type="range" id="volume-control" min="0" max="1" step="0.01" value="0.1" class="volume-slider">
+        </div>
+        <div class="h-1 bg-red-950 w-full rounded-full overflow-hidden">
+            <div id="progress" class="h-full bg-red-600 shadow-[0_0_8px_#dc2626] w-0 transition-all duration-300"></div>
+        </div>
+    </div>
+    <audio id="bg-audio" src="music/track.mp3" loop></audio>
+</div>
 
-        function drawMatrix() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-            ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = "#dc2626";
-            ctx.font = fontSize + "px monospace";
-            drops.forEach((y, i) => {
-                const text = letters[Math.floor(Math.random() * letters.length)];
-                ctx.fillText(text, i * fontSize, y * fontSize);
-                if (y * fontSize > height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
+<script>
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    const letters = "01010101ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const fontSize = 14;
+    let columns = width / fontSize;
+    let drops = Array(Math.floor(columns)).fill(1);
+
+    function drawMatrix() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = "#dc2626";
+        ctx.font = fontSize + "px monospace";
+        drops.forEach((y, i) => {
+            const text = letters[Math.floor(Math.random() * letters.length)];
+            ctx.fillText(text, i * fontSize, y * fontSize);
+            if (y * fontSize > height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+    }
+    setInterval(drawMatrix, 50);
+
+    let lastLogTime = 0;
+    function logAction(action) {
+        const now = Date.now();
+        if (now - lastLogTime < 800) return;
+        lastLogTime = now;
+
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = `>> ${action}... [OK]`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(20px)';
+            setTimeout(() => toast.remove(), 500);
+        }, 1800);
+
+        document.getElementById('entropy').innerText = (Math.random() * 0.05).toFixed(4) + "%";
+    }
+
+    let seconds = 0;
+    setInterval(() => {
+        seconds++;
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
+    }, 1000);
+
+    function madness() {
+        document.body.style.animation = "glitch 0.1s infinite";
+        logAction('CRITICAL_KERNEL_PANIC');
+        setTimeout(() => document.body.style.animation = "none", 600);
+    }
+
+    const audio = document.getElementById('bg-audio');
+    const playBtn = document.getElementById('play-pause');
+    const progress = document.getElementById('progress');
+    const trackInfo = document.getElementById('track-info');
+    const volumeControl = document.getElementById('volume-control');
+
+    // INITIALIZE VOLUME AT 10%
+    audio.volume = 0.1;
+
+    volumeControl.addEventListener('input', (e) => {
+        audio.volume = e.target.value;
+        if (audio.volume === 0) logAction('AUDIO_MUTED');
+    });
+
+    function startCoreAudio() {
+        if (audio.paused) {
+            audio.play().then(() => {
+                playBtn.innerText = '⏸';
+                trackInfo.classList.add('blink');
+                logAction('SYSTEM_AUDIO_ENGAGED');
+            }).catch(err => {
+                console.log("Autoplay blocked. Awaiting user interaction.");
             });
         }
-        setInterval(drawMatrix, 50);
+    }
 
-        function logAction(action) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerText = `>> ${action}... [SUCCESS]`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 2500);
-            document.getElementById('entropy').innerText = (Math.random() * 0.05).toFixed(4) + "%";
+    const initAudio = () => {
+        startCoreAudio();
+        ['click', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+            window.removeEventListener(event, initAudio);
+        });
+    };
+
+    ['click', 'keydown', 'touchstart', 'scroll'].forEach(event => {
+        window.addEventListener(event, initAudio);
+    });
+
+    function togglePlay() {
+        if (audio.paused) {
+            audio.play();
+            playBtn.innerText = '⏸';
+            trackInfo.classList.add('blink');
+        } else {
+            audio.pause();
+            playBtn.innerText = '▶';
+            trackInfo.classList.remove('blink');
         }
+    }
 
+    playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePlay();
+    });
 
-        let seconds = 0;
-        setInterval(() => {
-            seconds++;
-            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            document.getElementById('uptime').innerText = `${h}:${m}:${s}`;
-        }, 1000);
+    audio.addEventListener('timeupdate', () => {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progress.style.width = pct + '%';
+    });
 
+    window.onload = () => {
+        const status = document.getElementById('sys-status');
+        const phases = ["BOOTING...", "MAPPING_STACK...", "ALLOCATING_MEMORY...", "READY."];
+        let i = 0;
+        const interval = setInterval(() => {
+            status.innerText = `root@jvzxdx: ~ # ${phases[i]}`;
+            i++;
+            if (i >= phases.length) clearInterval(interval);
+        }, 600);
+    };
 
-        function madness() {
-            document.body.style.animation = "glitch 0.1s infinite";
-            logAction('CRITICAL_KERNEL_PANIC');
-            setTimeout(() => document.body.style.animation = "none", 600);
-        }
-
-        window.onload = () => {
-            const status = document.getElementById('sys-status');
-            const phases = ["BOOTING...", "MAPPING_STACK...", "ALLOCATING_MEMORY...", "READY."];
-            let i = 0;
-            const interval = setInterval(() => {
-                status.innerText = `root@jvzxdx: ~ # ${phases[i]}`;
-                i++;
-                if (i >= phases.length) clearInterval(interval);
-            }, 600);
-        };
-
-        window.onresize = () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            columns = width / fontSize;
-            drops = Array(Math.floor(columns)).fill(1);
-        }
-    </script>
+    window.onresize = () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        columns = width / fontSize;
+        drops = Array(Math.floor(columns)).fill(1);
+    }
+</script>
 </body>
 </html>
